@@ -29,32 +29,37 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
 
-	CurrentRotation = GetComponentRotation();
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Display, TEXT("Released grabber"))
+}
 
-	FString RotationString = CurrentRotation.ToCompactString();
-	
-	UE_LOG(LogTemp, Display, TEXT("Grabber Rotation is %s"), *RotationString);
-	
-	
-	float Time = GetWorld() -> TimeSeconds;
-
-	UE_LOG(LogTemp, Display, TEXT("Total Time elapsed : %f"), Time)
-
+void UGrabber::Grab()
+{
 	FVector Start = GetComponentLocation();
 	FVector End = Start + GetForwardVector() * MaxGrabDistance;
 	
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
 
-	float Damage = 0;
-	PrintDamage(Damage);
-	
-	// ...
-}
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(GrabRadius);
+	FHitResult HitResult;
+	bool HasHit = GetWorld()->SweepSingleByChannel(HitResult,
+		Start, End,
+		FQuat::Identity,
+		ECC_GameTraceChannel2,
+		Sphere
+		);
 
-void UGrabber::PrintDamage(float& Damage)
-{
-	Damage = 5;
-	UE_LOG(LogTemp, Display, TEXT("Damage is : %f"), Damage);
+	if (HasHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		UE_LOG(LogTemp, Display, TEXT("HitActor: %s"), *HitActor->GetActorNameOrLabel());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("No Actor HIt"));
+	}
 }
 

@@ -16,6 +16,12 @@ public:
 	// Sets default values for this component's properties
 	UGrabber();
 
+	UFUNCTION(BlueprintCallable)
+	void Release();
+
+	UFUNCTION(BlueprintCallable)
+	void Grab();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -29,5 +35,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxGrabDistance = 400;
 
-	void PrintDamage(float& Damage);
+	UPROPERTY(EditAnywhere)
+	float GrabRadius = 100;
 };
