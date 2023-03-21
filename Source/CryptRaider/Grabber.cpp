@@ -30,13 +30,23 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	
 	UPhysicsHandleComponent *PhysicsHandle = GetPhysicsHandle();
-	FVector TargetLocation = GetComponentLocation() + GetForwardVector() * HoldDistance;
-	PhysicsHandle->SetTargetLocationAndRotation(TargetLocation, GetComponentRotation());
+
+	if(PhysicsHandle-> GetGrabbedComponent() != nullptr)
+	{
+		FVector TargetLocation = GetComponentLocation() + GetForwardVector() * HoldDistance;
+		PhysicsHandle->SetTargetLocationAndRotation(TargetLocation, GetComponentRotation());
+	}
+	
 }
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Display, TEXT("Released grabber"))
+	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+	
+	if(PhysicsHandle->GetGrabbedComponent() != nullptr)
+	{
+		PhysicsHandle->ReleaseComponent();
+	}
 }
 
 void UGrabber::Grab()
@@ -49,6 +59,7 @@ void UGrabber::Grab()
 
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(GrabRadius);
 	FHitResult HitResult;
+	// check whether a component was hit by our trace
 	bool HasHit = GetWorld()->SweepSingleByChannel(HitResult,
 		Start, End,
 		FQuat::Identity,
@@ -58,8 +69,12 @@ void UGrabber::Grab()
 	
 	if (HasHit)
 	{
+		UPrimitiveComponent* HitComponent = HitResult.GetComponent();
+		//wake the component
+		HitComponent-> WakeAllRigidBodies();
+		//pick up: attach to the Physics Handle
 		PhysicsHandle -> GrabComponentAtLocationWithRotation(
-			HitResult.GetComponent(),
+			HitComponent,
 			NAME_None,
 			HitResult.ImpactPoint,
 			GetComponentRotation()
