@@ -43,4 +43,6 @@ private:
 	float HoldDistance = 200;
 
 	UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const;
+
+	bool GetGrabbableInReach(FHitResult& outHit) const;
 };
